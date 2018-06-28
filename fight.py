@@ -208,7 +208,6 @@ class Fight(object):
 
                 realdmg = (random.random() * dmg) + mindmg
 
-                text = self.prettyTxt(attacker, defender, texts)
                 defender.hp -= realdmg
 
                 if (random.random() * 100) < fallchance: # defender falls down?
