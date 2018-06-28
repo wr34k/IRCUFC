@@ -23,13 +23,13 @@ class IrcCommands(object):
         if self.IRC.flood_flag[chan] and (time.time() - self.IRC.last_cmd[chan]) < 5:
             return True
         if (time.time() - self.IRC.last_cmd[chan]) < 2 and self.IRC.flood_count[chan] > 2:
-            self.IRC.privmsg(chan, "\00305,01{}\00315 Slow down m8".format(nick))
+            self.IRC.privmsg(chan, "{} Slow down m8".format(self.IRC.mirc.color(nick, self.IRC.mirc.colors.RED) ))
             self.IRC.flood_flag[chan]=True
             self.IRC.last_cmd[chan] = time.time()
             return True
         if (time.time() - self.IRC.last_cmd[chan]) < 1:
             self.IRC.flood_count[chan]+=1
-            self.IRC.privmsg(chan, "\00305,01{}\00315 Slow down m8".format(nick))
+            self.IRC.privmsg(chan, "{} Slow down m8".format(self.IRC.mirc.color(nick, self.IRC.mirc.colors.RED) ))
             self.IRC.last_cmd[chan] = time.time()
             return True
 
@@ -64,7 +64,7 @@ class IrcCommands(object):
 
         else:
             if cmd == 'status':
-                self.fight.getStatus(nick)
+                self.fight.getStatus(chan)
 
 
         if self.fight.state == 'waiting_fighters_action':
@@ -72,7 +72,7 @@ class IrcCommands(object):
                 if chan != self.IRC.channel:
                     self.fight.set_next_action(nick, args)
                 else:
-                    self.IRC.privmsg(self.IRC.channel, "Not here retard your opponent can see your next move!")
+                    self.IRC.privmsg(self.IRC.channel, "{}".format(self.IRC.mirc.color("Not here retard your opponent can see your next move!", self.IRC.mirc.colors.LIGHTRED)))
 
 
         self.IRC.flood_flag[chan] = False

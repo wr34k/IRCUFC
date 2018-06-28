@@ -11,20 +11,18 @@ from ircCommands import IrcCommands
 
 server     = 'irc.servercentral.net'
 port       = 9999
-channel   = ('#wololo', None) # (chan, key)
+channel   = ('#IRCUFC', None) # (chan, key)
 use_ssl    = True
 
-nickname = 'devbruce'
-username = 'rrarrar'
-realname = '** WE BOTTIN **'
+nickname = 'IRCUFC'
+username = 'McBuffer'
+realname = '** WE FIGHTIN **'
 
 optkey= "!"
 timeout=0.4
 
 DEBUG = True
 sys.dont_write_bytecode = True
-
-
 
 
 class Irc(object):
@@ -159,10 +157,10 @@ class Irc(object):
             if args[0] == '{}reload'.format(self.optkey):
                 ret = recompile(args[1]) # Let you add new code to the bot without restarting it
                 if ret == True:
-                    self.privmsg(chan, "{} recompiled successfully!".format(args[1]))
+                    self.privmsg(chan, "{} recompiled successfully!".format(self.mirc.color(args[1], self.mirc.colors.GREEN)))
                     return
                 else:
-                    self.privmsg(chan, "Man we had a issue while recompiling {}".format(args[1]))
+                    self.privmsg(chan, "Man we had a issue while recompiling {}".format(self.mirc.color(args[1], self.mirc.colors.GREEN)))
                     self.log.error(ret)
                     return
 
@@ -173,11 +171,11 @@ class Irc(object):
         if chan not in self.timeouts:
             self.timeouts[chan] = {'last_cmd': time.time(), 'burst': 0, 'timeout': 0}
         self.raw("PRIVMSG {} :{}".format(chan, msg), self.timeouts[chan]['timeout'])
-        self.editTimeouts()
+        self.editTimeouts(chan)
 
 
 
-    def editTimeouts(self):
+    def editTimeouts(self, chan):
         if (time.time() - self.timeouts[chan]['last_cmd']) < 3:
             self.timeouts[chan]['burst'] += 1
         else:

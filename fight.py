@@ -35,8 +35,8 @@ class Fight(object):
     def startFight(self):
         self.state = 'starting_fight'
 
-        self.fighters[0] = Fighter(self.fighters[0], self.IRC.mirc.RED)
-        self.fighters[1] = Fighter(self.fighters[1], self.IRC.mirc.BLUE)
+        self.fighters[0] = Fighter(self.fighters[0], self.IRC.mirc.colors.RED)
+        self.fighters[1] = Fighter(self.fighters[1], self.IRC.mirc.colors.BLUE)
 
 
         # who start?
