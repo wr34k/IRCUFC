@@ -1,0 +1,215 @@
+{
+	"info": {
+		"lowhp": [
+			"%defender% starts bleeding",
+			"%defender% is having trouble focusing",
+			"%defender% is stagging",
+			"%defender% seems wasted"
+		],
+		"ground2stand": [
+			"%attacker% gets back on its feet",
+			"%attacker% is standing up"
+		],
+		"stand2ground": [
+			"%defender% just fell to the ground",
+			"%defender% falls over"
+		]
+	},
+
+    "moves": {
+        "stand": {
+            "kick": {
+                "high": {
+                    "stand": {
+                        "dmgidx": 40,
+                        "mindmg": 20,
+                        "fallchance": 5,
+                        "blockidx": 40,
+                        "text": [
+                            "%attacker% head kicks %defender%"
+                        ]
+                    },
+                    "ground": {
+                        "dmgidx": 60,
+                        "mindmg": 25,
+                        "blockidx": 28,
+                        "text": [
+                            "%attacker% stomps %defender% in the head!"
+                        ]
+                    }
+                },
+                "middle": {
+                    "stand": {
+                        "dmgidx": 30,
+                        "mindmg": 10,
+                        "fallchance": 8,
+                        "blockidx": 28,
+                        "text": [
+                            "%attacker% middle kicks %defender%"
+                        ]
+                    },
+                    "ground": {
+                        "dmgidx": 45,
+                        "mindmg": 20,
+                        "blockidx": 34,
+                        "text": [
+                            "%attacker% stomps %defender% in the body!"
+                        ]
+                    }
+                },
+                "low": {
+                    "stand": {
+                        "dmgidx": 23,
+                        "mindmg": 5,
+                        "fallchance": 15,
+                        "blockidx": 35,
+                        "text": [
+                            "%attacker% low kicks %defender%"
+                        ]
+                    },
+                    "ground": {
+                        "dmgidx": 30,
+                        "mindmg": 15,
+                        "blockidx": 40,
+                        "text": [
+                            "%attacker% kicks %defender%'s legs while %defender% is on the ground"
+                        ]
+                    }
+                }
+            },
+            "punch": {
+                "high": {
+                    "stand": {
+                        "dmgidx": 30,
+                        "mindmg": 10,
+                        "fallchance": 2,
+                        "blockidx": 30,
+                        "text": [
+                            "%attacker% head punches %defender%"
+                        ]
+                    }
+                },
+                "middle": {
+                    "stand": {
+                        "dmgidx": 20,
+                        "mindmg": 5,
+                        "fallchance": 4,
+                        "blockidx": 15,
+                        "text": [
+                            "%attacker% punches %defender% to the body"
+                        ]
+                    }
+                }
+            },
+            "block": {
+                "high": {
+                    "chance": 85,
+                    "text": [
+                        "Good block from %defender% he managed to avoid the hit!"
+                    ]
+                },
+                "middle": {
+                    "chance": 85,
+                    "text": [
+                        "Good block from %defender% he managed to avoid the hit!"
+                    ]
+                },
+                "low": {
+                    "chance": 80,
+                    "text": [
+                        "Good block from %defender% he managed to avoid the hit!"
+                    ]
+                }
+            }
+        },
+        "ground": {
+            "standup": {
+                "stand": {
+                    "chance": 30
+                },
+                "ground": {
+                    "chance": 70
+                }
+            },
+            "kick": {
+                "high": {
+                    "stand": {
+                        "dmgidx": 30,
+                        "mindmg": 10,
+                        "fallchance": 8,
+                        "blockidx": 40,
+                        "text": [
+                            "%attacker% head kicks %defender% from the ground!"
+                        ]
+                    },
+                    "ground": {
+                        "dmgidx": 40,
+                        "mindmg": 23,
+                        "blockidx": 55,
+                        "text": [
+                            "%attacker% hit %defender% with huge kneel kicks to the head!"
+                        ]
+                    }
+                },
+                "middle": {
+                    "stand": {
+                        "dmgidx": 20,
+                        "mindmg": 5,
+                        "fallchance": 5,
+                        "blockidx": 40,
+                        "text": [
+                            "%attacker% middle kicks %defender% from the ground!"
+                        ]
+                    },
+                    "ground": {
+                        "dmgidx": 25,
+                        "mindmg": 17,
+                        "blockidx": 50,
+                        "text": [
+                            "%attacker% hit %defender% with kneel kicks to the body"
+                        ]
+                    }
+                },
+                "low": {
+                    "stand": {
+                        "dmgidx": 15,
+                        "mindmg": 3,
+                        "fallchance": 18,
+                        "blockidx": 45,
+                        "text": [
+                            "%attacker% low kicks %defender% from the ground!"
+                        ]
+                    },
+                    "ground": {
+                        "dmgidx": 15,
+                        "mindmg": 2,
+                        "blockidx": 30,
+                        "text": [
+                            "%attacker% hit %defender% with kneel kicks to the legs"
+                        ]
+                    }
+                }
+            },
+            "block": {
+                "high": {
+                    "chance": 90,
+                    "text": [
+                        "Good block from %defender% he managed to avoid the hit!"
+                    ]
+                },
+                "middle": {
+                    "chance": 90,
+                    "text": [
+                        "Good block from %defender% he managed to avoid the hit!"
+                    ]
+                },
+                "low": {
+                    "chance": 85,
+                    "text": [
+                        "Good block from %defender% he managed to avoid the hit!"
+                    ]
+                }
+            }
+        }
+    }
+}
