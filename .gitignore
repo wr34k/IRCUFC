@@ -1,2 +1,2 @@
-# pyCache
 __pycache__/
+*.sw[op]
