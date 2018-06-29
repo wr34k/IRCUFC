@@ -28,35 +28,30 @@ sys.dont_write_bytecode = True
 class Irc(object):
 
     def __init__(self):
-        self.sock = None
-        self.lag=False
+        self.sock           = None
+        self.lag            = False
 
-        self.last_cmd={}
-        self.flood_flag={}
-        self.flood_count={}
+        self.last_cmd       = {}
+        self.flood_flag     = {}
+        self.flood_count    = {}
+        self.timeouts       = {}
 
-        self.mirc = MIRCFormat()
+        self.mirc           = MIRCFormat()
+        self.log            = Log(DEBUG)
+        self.cmds           = IrcCommands(self)
 
-        self.optkey = optkey
+        self.server         = server
+        self.port           = port
+        self.ssl            = use_ssl
 
-        self.log = Log(DEBUG)
+        self.nick           = nickname
+        self.user           = username
+        self.real           = realname
 
-        self.server = server
-        self.port = port
-        self.ssl = use_ssl
+        self.optkey         = optkey
 
-        self.nick = nickname
-        self.user = username
-        self.real = realname
+        self.channel,self.chankey = channel
 
-        self.channel, self.chankey = channel
-
-        self.nameslists = {}
-        self.nameslistFlag = {}
-
-        self.cmds = IrcCommands(self)
-
-        self.timeouts = {}
 
     def connect(self):
         try:

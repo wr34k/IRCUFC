@@ -18,5 +18,6 @@ class Fighter(object):
 
         self.first_time_lowhp = True
 
+        # Will be used once PALMARES is implemented
         self.wins = 0
         self.looses = 0
