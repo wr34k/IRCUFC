@@ -15,7 +15,6 @@ class Fighter(object):
         self.nextAction = None
 
         self.advantage = False
-        self.groundpos = None
 
         self.first_time_lowhp = True
 

@@ -26,7 +26,7 @@ class Fight(object):
             self.fighters += [nick]
 
         if len(self.fighters) == 2:
-            self.IRC.privmsg(self.IRC.channel, "Alright {}, {}, let's fight!".format(self.fighters[0], self.fighters[1]))
+            self.IRC.privmsg(self.IRC.channel, "Alright. {}, {}, let's fight!".format(self.fighters[0], self.fighters[1]))
             self.state = 'fighters_ready'
         else:
             self.IRC.privmsg(self.IRC.channel, "Waiting for 2nd fighter...")

@@ -9,7 +9,7 @@ from ircReload import recompile
 from ircCommands import IrcCommands
 
 
-server     = 'irc.servercentral.net'
+server     = 'irc.underworld.no'
 port       = 9999
 channel   = ('#IRCUFC', None) # (chan, key)
 use_ssl    = True

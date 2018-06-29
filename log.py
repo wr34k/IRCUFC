@@ -63,15 +63,15 @@ class Log(object):
         return "".join(a for a in args)
 
     def info(self, msg):
-        if not self.debug:
+        if self.debug:
             self.func( self.construct( "[", self.colors.fg.LIGHTGREEN, "*", self.colors.fg.DEFAULT, "] ", msg ) )
 
     def warn(self, msg):
-        if not self.debug:
+        if self.debug:
             self.func( self.construct( "[", self.colors.fg.LIGHTYELLOW, "!", self.colors.fg.DEFAULT, "] ", msg ) )
 
     def error(self, msg, exception=None):
-        if not self.debug:
+        if self.debug:
             self.func( self.construct( "[", self.colors.fg.LIGHTRED, "x", self.colors.fg.DEFAULT, "] ", msg ) )
             if exception:
                 self.func( self.construct( "[", self.colors.fg.LIGHTRED, "x", self.colors.fg.DEFAULT, "] ", str(exception) ) )
