@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import traceback
 
 class Colors(object):
     class Format(object):
@@ -60,7 +61,7 @@ class Log(object):
         self.func = func
 
     def construct(self, *args):
-        return "".join(a for a in args)
+        return "".join(args)
 
     def info(self, msg):
         if self.debug:
@@ -75,3 +76,4 @@ class Log(object):
             self.func( self.construct( "[", self.colors.fg.LIGHTRED, "x", self.colors.fg.DEFAULT, "] ", msg ) )
             if exception:
                 self.func( self.construct( "[", self.colors.fg.LIGHTRED, "x", self.colors.fg.DEFAULT, "] ", str(exception) ) )
+                traceback.print_tb(exception.__traceback__)

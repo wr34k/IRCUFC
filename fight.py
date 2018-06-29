@@ -100,12 +100,16 @@ class Fight(object):
 
 
     def getStatus(self, nick):
-        for f in self.fighters:
-            if f.nick == nick:
-                self.IRC.privmsg(nick, "Status for {} -> Current health: {} | Current stance: {} | Next action: {}".format(f.nick, f.hp, f.stance, f.nextAction))
-            else:
-                self.IRC.privmsg(nick, "Status for {} -> Current health: {} | Current stance: {}".format(f.nick, f.hp, f.stance))
-
+        if self.state == 'inactive':
+            self.IRC.privmsg(nick, "Standby, waiting for a fight to start...")
+        elif self.state == 'waiting_fighter':
+            self.IRC.privmsg(nick, "Waiting for 2nd opponent, type {}fight to register for the next fight!".format(self.IRC.optkey))
+        else:
+            for f in self.fighters:
+                if f.nick == nick:
+                    self.IRC.privmsg(nick, "Status for {} -> Current health: {} | Current stance: {} | Next action: {}".format(f.nick, f.hp, f.stance, f.nextAction))
+                else:
+                    self.IRC.privmsg(nick, "Status for {} -> Current health: {} | Current stance: {}".format(f.nick, f.hp, f.stance))
 
 
     def fightOver(self):

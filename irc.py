@@ -85,50 +85,62 @@ class Irc(object):
 
     def listen(self):
         while True:
-            if self.lag:
-                self.lag=False
-                data += self.sock.recv(1024).decode('utf-8', 'ignore')
-            else:
-                data = self.sock.recv(1024).decode('utf-8', 'ignore')
+            try:
+                if self.lag:
+                    self.lag=False
+                    data += self.sock.recv(1024).decode('utf-8', 'ignore')
+                else:
+                    data = self.sock.recv(1024).decode('utf-8', 'ignore')
 
-            for line in [x.split() for x in data.split("\r\n") if len(x.split()) > 1]:
-                self.log.info("<< {}".format(' '.join(line)))
+                for line in [x.split() for x in data.split("\r\n") if len(x.split()) > 1]:
+                    self.log.info("<< {}".format(' '.join(line)))
 
-                if line[0][1:] == 'ING':
-                    self.raw("PONG {}".format(line[1]))
+                    if line[0][1:] == 'ING':
+                        self.raw("PONG {}".format(line[1]))
 
-                elif line[1] == '001': # connected
-                    self.join()
+                    elif line[1] == '001': # connected
+                        self.join()
 
-                elif line[1] == 'JOIN': # Someone joined a channel
-                    self.log.info("{} JOIN to {}".format(line[0], line[2]))
-                    pass
+                    elif line[1] == 'JOIN': # Someone joined a channel
+                        self.log.info("{} JOIN to {}".format(line[0], line[2]))
+                        pass
 
-                elif line[1] == 'PART': # Someone emopart a channel
-                    self.log.info("{} PART from {}".format(line[0], line[2]))
-                    pass
+                    elif line[1] == 'PART': # Someone emopart a channel
+                        self.log.info("{} PART from {}".format(line[0], line[2]))
+                        pass
 
-                elif line[1] == '433': # Nick already in use
-                    self.nick += "_"
-                    self.updateNick()
+                    elif line[1] == '433': # Nick already in use
+                        self.nick += "_"
+                        self.updateNick()
 
-                elif line[1] == 'KICK': #Got kicked lmao
-                    if line[0][1:].split("@")[0].split("!") == self.nick:
-                        self.log.warn("Got kicked from {} !".format(line[2]))
-                        chan = line[2]
-                        if chan == self.channel:
+                    elif line[1] == 'KICK': #Got kicked lmao
+                        if line[0][1:].split("@")[0].split("!") == self.nick:
+                            self.log.warn("Got kicked from {} !".format(line[2]))
+                            chan = line[2]
+                            if chan == self.channel:
                                 self.join()
 
-                elif line[1] == 'INVITE':
-                    self.log.info("{} invited the bot to {}".format(line[0][1:].split("!")[0], line[3][1:]))
-                    self.join(line[3][1:])
+                    elif line[1] == 'INVITE':
+                        self.log.info("{} invited the bot to {}".format(line[0][1:].split("!")[0], line[3][1:]))
+                        self.join(line[3][1:])
 
 
-                elif line[1] == 'PRIVMSG':
-                    nick,user   = line[0][1:].split("@")[0].split("!")
-                    user = user[1:] if user[0] == '~' else user
-                    host        = line[0].split("@")[1]
-                    self.handle_msg(line[2], self.isAdmin(line[0][1:]), nick, user, host, ' '.join(line[3:])[1:])
+                    elif line[1] == 'PRIVMSG':
+                        nick,user   = line[0][1:].split("@")[0].split("!")
+                        user        = user[1:] if user[0] == '~' else user
+                        host        = line[0].split("@")[1]
+                        self.handle_msg(line[2], self.isAdmin(line[0][1:]), nick, user, host, ' '.join(line[3:])[1:])
+
+            except (UnicodeDecodeError, UnicodeEncodeError):
+                pass
+
+            except KeyboardInterrupt:
+                self.log.warn("^C, Exiting...")
+                return
+
+            except Exception as e:
+                self.log.error("Exception in listen()", e)
+                pass
 
     def join(self):
         self.log.info("Now joining {} ...".format(self.channel))

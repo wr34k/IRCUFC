@@ -55,6 +55,8 @@ class IrcCommands(object):
                     self.IRC.raw(" ".join(args))
 
 
+        if cmd == 'status':
+            self.fight.getStatus(chan)
 
         if self.fight.state in ('inactive', 'waiting_fighter'):
             if cmd == 'fight':
@@ -69,9 +71,6 @@ class IrcCommands(object):
                 else:
                     self.IRC.privmsg(self.IRC.channel, "{}".format(self.IRC.mirc.color("Not here retard your opponent can see your next move!", self.IRC.mirc.colors.LIGHTRED)))
 
-        else:
-            if cmd == 'status':
-                self.fight.getStatus(chan)
 
         self.IRC.flood_flag[chan] = False
         self.IRC.flood_count[chan] = 0
