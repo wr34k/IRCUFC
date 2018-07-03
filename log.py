@@ -72,8 +72,7 @@ class Log(object):
             self.func( self.construct( "[", self.colors.fg.LIGHTYELLOW, "!", self.colors.fg.DEFAULT, "] ", msg ) )
 
     def error(self, msg, exception=None):
-        if self.debug:
-            self.func( self.construct( "[", self.colors.fg.LIGHTRED, "x", self.colors.fg.DEFAULT, "] ", msg ) )
-            if exception:
-                self.func( self.construct( "[", self.colors.fg.LIGHTRED, "x", self.colors.fg.DEFAULT, "] ", str(exception) ) )
-                traceback.print_tb(exception.__traceback__)
+        self.func( self.construct( "[", self.colors.fg.LIGHTRED, "x", self.colors.fg.DEFAULT, "] ", msg ) )
+        if exception:
+            self.func( self.construct( "[", self.colors.fg.LIGHTRED, "x", self.colors.fg.DEFAULT, "] ", str(exception) ) )
+            traceback.print_tb(exception.__traceback__)

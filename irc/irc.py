@@ -24,7 +24,6 @@ username = 'McBuffer'
 realname = '** WE FIGHTIN **'
 
 optkey= "!"
-timeout=0.4
 
 DEBUG = True
 
@@ -74,12 +73,10 @@ class IrcBot(object):
         self.listen()
 
     def register(self):
-        self.log.info("Identifying...")
         self.raw("USER {} 0 * :{}".format(self.user, self.real))
         self.raw("NICK {}".format(self.nick))
 
     def updateNick(self):
-        self.log.info("Updating NICK to {}".format(self.nick))
         self.raw("NICK {}".format(self.nick))
 
     def listen(self):
@@ -115,7 +112,6 @@ class IrcBot(object):
                 pass
 
     def join(self):
-        self.log.info("Now joining {} ...".format(self.channel))
         self.raw("JOIN {} {}".format(self.channel, self.chankey)) if self.chankey else self.raw("JOIN {}".format(self.channel))
 
 
