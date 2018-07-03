@@ -190,13 +190,14 @@ class Fight(object):
 
         # self.IRC.log.info("{} rolled {} and {} rolled {}".format(self.fighters[0].nick, roll1, self.fighters[1].nick, roll2))
 
-        if attacker.nextAction[0] == 'block' and defender.nextAction[0] != 'block':
+        if attacker.nextAction[0] == 'block' and defender.nextAction[0] == 'block':
+            self.shout("Both fighters are trying to block at the same time, resulting in a completely retarded action...")
+            return
+
+        elif attacker.nextAction[0] == 'block':
             tmp = attacker
             attacker = defender
             defender = tmp
-        elif attacker.nextAction[0] == 'block' and defender.nextAction[0] == 'block':
-            self.shout("Both fighters are trying to block at the same time, resulting in a completely retarded action...")
-            return
 
         attacker.advantage = True
         defender.advantage = False
