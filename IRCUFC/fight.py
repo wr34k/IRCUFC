@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 
+import random, json, os
+
 from fighter import Fighter
-import random, json
 
 CONFIG_FILE = "assets/config.json"
+PALMARES_FILE = "assets/palmares.json"
+
 
 class Fight(object):
     def __init__(self, IRC):
@@ -123,16 +126,33 @@ class Fight(object):
         winner = self.fighters[0] if self.fighters[1].hp <= 0 else self.fighters[1]
         looser = self.fighters[0] if self.fighters[0].hp <= 0 else self.fighters[1]
 
-        winner.wins += 1
-        looser.looses += 1
+
+        self.updatePalmares(winner, looser)
+
 
         self.shout("{}{}".format(self.IRC.mirc.BOLD, self.IRC.mirc.color("Fight is over.", self.IRC.mirc.colors.LIGHTGREY)))
-        self.shout("{}{} won the fight against {} with {} hp left.".format( \
+
+        self.IRC.privmsg(self.IRC.channel, "{}{} won the fight against {} with {} hp left.".format( \
             self.IRC.mirc.BOLD,
             self.IRC.mirc.color(winner.nick, winner.colour), \
             self.IRC.mirc.color(looser.nick, looser.colour), \
             self.IRC.mirc.color(int(winner.hp), self.IRC.mirc.colors.GREEN) ) \
         )
+
+        self.IRC.privmsg(self.IRC.channel, "{}{} wins: {}, looses: {}".format( \
+            self.IRC.mirc.BOLD, \
+            self.IRC.mirc.color(winner.nick, self.IRC.mirc.colors.YELLOW), \
+            self.IRC.mirc.color(winner.wins, self.IRC.mirc.colors.GREEN), \
+            self.IRC.mirc.color(winner.looses, self.IRC.mirc.colors.RED) \
+        ))
+
+        self.IRC.privmsg(self.IRC.channel, "{}{} wins: {}, looses: {}".format( \
+            self.IRC.mirc.BOLD, \
+            self.IRC.mirc.color(looser.nick, self.IRC.mirc.colors.YELLOW), \
+            self.IRC.mirc.color(looser.wins, self.IRC.mirc.colors.GREEN), \
+            self.IRC.mirc.color(looser.looses, self.IRC.mirc.colors.RED) \
+        ))
+
 
         self.state = 'inactive'
         self.fighters = []
@@ -169,7 +189,6 @@ class Fight(object):
         return dmg, mindmg, blockidx, fallchance, standchance, texts
 
     def attack(self):
-
         roll1 = roll2 = 0
         while roll1 == roll2:
             roll1 = random.random()
@@ -264,3 +283,38 @@ class Fight(object):
         for f in self.fighters:
             self.IRC.privmsg(f.nick, msg)
         self.IRC.privmsg(self.IRC.channel, msg)
+
+    def updatePalmares(self, winner, looser):
+
+        mode = "r" if os.path.exists(PALMARES_FILE) else "w+"
+        with open(PALMARES_FILE, mode) as f:
+            try:
+                palmares = json.loads(f.read())
+            except Exception as e:
+                self.IRC.log.error("Error in json.loads() backuping palmares file to {}.bkp".format(PALMARES_FILE), e)
+                from shutil import copyfile
+                copyfile(PALMARES_FILE, "{}.bkp".format(PALMARES_FILE))
+                palmares = {}
+
+        if winner.nick not in palmares:
+            palmares[winner.nick] = {}
+            palmares[winner.nick]["wins"] = 0
+            palmares[winner.nick]["looses"] = 0
+
+        palmares[winner.nick]["wins"] += 1
+
+        if looser.nick not in palmares:
+            palmares[looser.nick] = {}
+            palmares[looser.nick]["wins"] = 0
+            palmares[looser.nick]["looses"] = 0
+
+        palmares[looser.nick]["looses"] += 1
+
+        winner.wins     = palmares[winner.nick]["wins"]
+        winner.looses   = palmares[winner.nick]["looses"]
+        looser.wins     = palmares[looser.nick]["wins"]
+        looser.looses   = palmares[looser.nick]["looses"]
+
+        with open(PALMARES_FILE, "w+") as f:
+            f.write(json.dumps(palmares))
+

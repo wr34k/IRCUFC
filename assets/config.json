@@ -24,7 +24,7 @@
                         "dmgidx": 40,
                         "mindmg": 20,
                         "fallchance": 5,
-                        "blockidx": 40,
+                        "blockidx": 50,
                         "text": [
                             "%attacker% head kicks %defender%"
                         ]
@@ -43,7 +43,7 @@
                         "dmgidx": 30,
                         "mindmg": 10,
                         "fallchance": 8,
-                        "blockidx": 28,
+                        "blockidx": 38,
                         "text": [
                             "%attacker% middle kicks %defender%"
                         ]
@@ -51,7 +51,7 @@
                     "ground": {
                         "dmgidx": 45,
                         "mindmg": 20,
-                        "blockidx": 34,
+                        "blockidx": 32,
                         "text": [
                             "%attacker% stomps %defender% in the body!"
                         ]
@@ -94,7 +94,7 @@
                         "dmgidx": 20,
                         "mindmg": 5,
                         "fallchance": 4,
-                        "blockidx": 15,
+                        "blockidx": 21,
                         "text": [
                             "%attacker% punches %defender% to the body"
                         ]
@@ -125,7 +125,7 @@
         "ground": {
             "standup": {
                 "stand": {
-                    "chance": 30
+                    "chance": 20
                 },
                 "ground": {
                     "chance": 70
@@ -137,7 +137,7 @@
                         "dmgidx": 30,
                         "mindmg": 10,
                         "fallchance": 8,
-                        "blockidx": 40,
+                        "blockidx": 58,
                         "text": [
                             "%attacker% head kicks %defender% from the ground!"
                         ]
@@ -145,7 +145,7 @@
                     "ground": {
                         "dmgidx": 40,
                         "mindmg": 23,
-                        "blockidx": 55,
+                        "blockidx": 42,
                         "text": [
                             "%attacker% hit %defender% with huge kneel kicks to the head!"
                         ]
@@ -156,7 +156,7 @@
                         "dmgidx": 20,
                         "mindmg": 5,
                         "fallchance": 5,
-                        "blockidx": 40,
+                        "blockidx": 43,
                         "text": [
                             "%attacker% middle kicks %defender% from the ground!"
                         ]
@@ -164,7 +164,7 @@
                     "ground": {
                         "dmgidx": 25,
                         "mindmg": 17,
-                        "blockidx": 50,
+                        "blockidx": 48,
                         "text": [
                             "%attacker% hit %defender% with kneel kicks to the body"
                         ]
@@ -175,7 +175,7 @@
                         "dmgidx": 15,
                         "mindmg": 3,
                         "fallchance": 18,
-                        "blockidx": 45,
+                        "blockidx": 33,
                         "text": [
                             "%attacker% low kicks %defender% from the ground!"
                         ]
@@ -183,7 +183,7 @@
                     "ground": {
                         "dmgidx": 15,
                         "mindmg": 2,
-                        "blockidx": 30,
+                        "blockidx": 40,
                         "text": [
                             "%attacker% hit %defender% with kneel kicks to the legs"
                         ]

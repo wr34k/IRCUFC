@@ -8,15 +8,15 @@ def eventPING(IRC, line):
 def event001(IRC, line):
     IRC.join()
 
+def event433(IRC, line):
+    IRC.nick += "_"
+    IRC.updateNick()
+
 def eventJOIN(IRC, line):
     IRC.log.info("{} JOIN to {}".format(line[0], line[2]))
 
 def eventPART(IRC, line):
     IRC.log.info("{} PART from {}".format(line[0], line[2]))
-
-def event433(IRC, line):
-    IRC.nick += "_"
-    IRC.updateNick()
 
 def eventKICK(IRC, line):
     if line[3] == IRC.nick:

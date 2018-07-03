@@ -96,8 +96,10 @@ class IrcBot(object):
 
                     else:
                         try:
-                            getattr(ircEvents, "event{}".format(line[1].upper()))(self, line)
-                        except:
+                            if hasattr(ircEvents, "event{}".format(line[1].upper())):
+                                getattr(ircEvents, "event{}".format(line[1].upper()))(self, line)
+                        except Exception as e:
+                            self.log.error("Error in getattr()", e)
                             pass
 
             except (UnicodeDecodeError, UnicodeEncodeError):
