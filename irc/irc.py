@@ -2,10 +2,15 @@
 
 import sys, socket, ssl, time, os, re
 
+sys.dont_write_bytecode = True
+os.chdir(sys.path[0] or ".")
+sys.path += ("..", "../IRCUFC")
+
+import ircEvents
+
 from log import Colors, Log
 from mircformat import MIRCFormat
 from ircReload import recompile
-
 from ircCommands import IrcCommands
 
 
@@ -22,10 +27,9 @@ optkey= "!"
 timeout=0.4
 
 DEBUG = True
-sys.dont_write_bytecode = True
 
 
-class Irc(object):
+class IrcBot(object):
 
     def __init__(self):
         self.sock           = None
@@ -91,40 +95,13 @@ class Irc(object):
                     self.log.info("<< {}".format(' '.join(line)))
 
                     if line[0][1:] == 'ING':
-                        self.raw("PONG {}".format(line[1]))
+                        ircEvents.eventPING(self, line)
 
-                    elif line[1] == '001': # connected
-                        self.join()
-
-                    elif line[1] == 'JOIN': # Someone joined a channel
-                        self.log.info("{} JOIN to {}".format(line[0], line[2]))
-                        pass
-
-                    elif line[1] == 'PART': # Someone emopart a channel
-                        self.log.info("{} PART from {}".format(line[0], line[2]))
-                        pass
-
-                    elif line[1] == '433': # Nick already in use
-                        self.nick += "_"
-                        self.updateNick()
-
-                    elif line[1] == 'KICK': #Got kicked lmao
-                        if line[0][1:].split("@")[0].split("!") == self.nick:
-                            self.log.warn("Got kicked from {} !".format(line[2]))
-                            chan = line[2]
-                            if chan == self.channel:
-                                self.join()
-
-                    elif line[1] == 'INVITE':
-                        self.log.info("{} invited the bot to {}".format(line[0][1:].split("!")[0], line[3][1:]))
-                        self.join(line[3][1:])
-
-
-                    elif line[1] == 'PRIVMSG':
-                        nick,user   = line[0][1:].split("@")[0].split("!")
-                        user        = user[1:] if user[0] == '~' else user
-                        host        = line[0].split("@")[1]
-                        self.handle_msg(line[2], self.isAdmin(line[0][1:]), nick, user, host, ' '.join(line[3:])[1:])
+                    else:
+                        try:
+                            getattr(ircEvents, "event{}".format(line[1].upper()))(self, line)
+                        except:
+                            pass
 
             except (UnicodeDecodeError, UnicodeEncodeError):
                 pass
@@ -152,7 +129,7 @@ class Irc(object):
 
     def isAdmin(self, ident):
         ret = False
-        for line in [line.strip() for line in open('admins', 'r').readlines() if line]:
+        for line in [line.strip() for line in open('assets/admins', 'r').readlines() if line]:
             if re.compile(line.replace('*', '.*')).search(ident):
                 ret = True
         return ret
@@ -201,7 +178,3 @@ class Irc(object):
 
     def action(self, chan, msg):
         self.privmsg(chan, "\x01ACTION {}\x01".format(msg))
-
-
-if __name__=='__main__':
-    Irc().run()

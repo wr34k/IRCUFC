@@ -3,7 +3,7 @@
 from fighter import Fighter
 import random, json
 
-CONFIG_FILE = "./config.json"
+CONFIG_FILE = "assets/config.json"
 
 class Fight(object):
     def __init__(self, IRC):
