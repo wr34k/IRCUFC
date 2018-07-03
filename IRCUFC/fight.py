@@ -20,16 +20,25 @@ class Fight(object):
     def addFighter(self, nick):
         self.state = 'waiting_fighter'
         if nick in self.fighters:
-            self.IRC.privmsg(self.IRC.channel, "Hey {} you're already registered!".format(nick))
+            self.IRC.privmsg(self.IRC.channel, "[{}] Hey {} you're already registered!".format( \
+                self.IRC.mirc.color("!", self.IRC.mirc.colors.YELLOW), \
+                self.IRC.mirc.color(nick, self.IRC.mirc.colors.YELLOW)) \
+            )
             return
         else:
             self.fighters += [nick]
 
         if len(self.fighters) == 2:
-            self.IRC.privmsg(self.IRC.channel, "Alright. {}, {}, let's fight!".format(self.fighters[0], self.fighters[1]))
+            self.IRC.privmsg(self.IRC.channel, "[{}] Alright. {}, {}, let's fight!".format( \
+                self.IRC.mirc.color("*", self.IRC.mirc.colors.GREEN), \
+                self.IRC.mirc.color(self.fighters[0], self.IRC.mirc.colors.RED), \
+                self.IRC.mirc.color(self.fighters[1], self.IRC.mirc.colors.BLUE)) \
+            )
             self.state = 'fighters_ready'
         else:
-            self.IRC.privmsg(self.IRC.channel, "Waiting for 2nd fighter...")
+            self.IRC.privmsg(self.IRC.channel, "[{}] Waiting for 2nd fighter...".format( \
+                self.IRC.mirc.color("*", self.IRC.mirc.colors.GREEN)) \
+            )
 
 
     def startFight(self):
@@ -38,13 +47,11 @@ class Fight(object):
         self.fighters[0] = Fighter(self.fighters[0], self.IRC.mirc.colors.RED)
         self.fighters[1] = Fighter(self.fighters[1], self.IRC.mirc.colors.BLUE)
 
-
         # who start?
         roll1 = roll2 = 0
         while roll1 == roll2:
             roll1 = random.random()
             roll2 = random.random()
-
 
         if roll1 > roll2:
             self.fighters[0].advantage = True
@@ -58,8 +65,8 @@ class Fight(object):
         self.state = 'waiting_fighters_action'
 
         for f in self.fighters:
-            self.IRC.privmsg(f.nick, "What is your next move?")
-            self.IRC.privmsg(f.nick, "Actions available: '{}'".format("', '".join(self.get_next_avail_action(f.nick))))
+            self.IRC.privmsg(f.nick, "[{}] What is your next move? (Use {}action <action> to set your next move)".format(self.IRC.mirc.color("~", self.IRC.mirc.colors.BLUE), self.IRC.optkey))
+            self.IRC.privmsg(f.nick, "[{}] Actions available: '{}'".format(self.IRC.mirc.color("*", self.IRC.mirc.colors.GREEN), "', '".join(self.get_next_avail_action(f.nick))))
 
 
     def get_next_avail_action(self, nick): # TODO: fix this mess.
@@ -81,14 +88,14 @@ class Fight(object):
         for f in self.fighters:
             if f.nick == nick:
                 if f.nextAction is not None:
-                    self.IRC.privmsg(nick, "You already chose your next move!")
+                    self.IRC.privmsg(nick, "[{}] You already chose your next move!".format(self.IRC.mirc.color("!", self.IRC.mirc.colors.YELLOW)))
                     return
 
                 if " ".join(action) in self.get_next_avail_action(nick):
                     f.nextAction = action
-                    self.IRC.privmsg(nick, "Next move set!")
+                    self.IRC.privmsg(nick, "[{}] Next move set!".format(self.IRC.mirc.color("*", self.IRC.mirc.colors.GREEN)))
                 else:
-                    self.IRC.privmsg(nick, "Move not recognized")
+                    self.IRC.privmsg(nick, "[{}] Move not recognized".format(self.IRC.mirc.color("!", self.IRC.mirc.colors.YELLOW)))
 
         done = True
         for f in self.fighters:
@@ -101,15 +108,15 @@ class Fight(object):
 
     def getStatus(self, nick):
         if self.state == 'inactive':
-            self.IRC.privmsg(nick, "Standby, waiting for a fight to start...")
+            self.IRC.privmsg(nick, "[{}] Standby, waiting for a fight to start...".format(self.IRC.mirc.color("*", self.IRC.mirc.colors.GREEN)))
         elif self.state == 'waiting_fighter':
-            self.IRC.privmsg(nick, "Waiting for 2nd opponent, type {}fight to register for the next fight!".format(self.IRC.optkey))
+            self.IRC.privmsg(nick, "[{}] Waiting for 2nd opponent, type {}fight to register for the next fight!".format(self.IRC.mirc.color("*", self.IRC.mirc.colors.GREEN), self.IRC.optkey))
         else:
             for f in self.fighters:
                 if f.nick == nick:
-                    self.IRC.privmsg(nick, "Status for {} -> Current health: {} | Current stance: {} | Next action: {}".format(f.nick, f.hp, f.stance, f.nextAction))
+                    self.IRC.privmsg(nick, "[{}] Status for {} -> Current health: {} | Current stance: {} | Next action: {}".format(self.IRC.mirc.color("*", self.IRC.mirc.colors.GREEN), f.nick, int(f.hp), f.stance, f.nextAction))
                 else:
-                    self.IRC.privmsg(nick, "Status for {} -> Current health: {} | Current stance: {}".format(f.nick, f.hp, f.stance))
+                    self.IRC.privmsg(nick, "[{}] Status for {} -> Current health: {} | Current stance: {}".format(self.IRC.mirc.color("*", self.IRC.mirc.colors.GREEN), f.nick, int(f.hp), f.stance))
 
 
     def fightOver(self):
@@ -119,8 +126,13 @@ class Fight(object):
         winner.wins += 1
         looser.looses += 1
 
-        self.shout("\x02\x0315Fight is over.")
-        self.shout("\x02\x03{}{}\x0f won the fight against \x02\x03{}{}\x0f with \x02\x0303{}\x0f hp left.".format(winner.colour, winner.nick, looser.colour, looser.nick, int(winner.hp)))
+        self.shout("{}{}".format(self.IRC.mirc.BOLD, self.IRC.mirc.color("Fight is over.", self.IRC.mirc.colors.LIGHTGREY)))
+        self.shout("{}{} won the fight against {} with {} hp left.".format( \
+            self.IRC.mirc.BOLD,
+            self.IRC.mirc.color(winner.nick, winner.colour), \
+            self.IRC.mirc.color(looser.nick, looser.colour), \
+            self.IRC.mirc.color(int(winner.hp), self.IRC.mirc.colors.GREEN) ) \
+        )
 
         self.state = 'inactive'
         self.fighters = []
@@ -165,9 +177,9 @@ class Fight(object):
 
 
         if self.fighters[0].advantage:
-            roll1 += 0.15
+            roll1 += 0.08
         else:
-            roll2 += 0.15
+            roll2 += 0.08
 
         if roll1 > roll2:
             attacker = self.fighters[0]
@@ -175,6 +187,8 @@ class Fight(object):
         else:
             attacker = self.fighters[1]
             defender = self.fighters[0]
+
+        # self.IRC.log.info("{} rolled {} and {} rolled {}".format(self.fighters[0].nick, roll1, self.fighters[1].nick, roll2))
 
         if attacker.nextAction[0] == 'block' and defender.nextAction[0] != 'block':
             tmp = attacker
@@ -207,7 +221,7 @@ class Fight(object):
                 self.shout("{}".format(blocktxt))
             else:
                 if defender.nextAction[0] == 'block':
-                    self.shout("{} Tryed to block {} but failed miserably!".format(defender.nick, defender.nextAction[1]))
+                    self.shout("{} Tryed to block {} but failed miserably!".format(self.IRC.mirc.color(defender.nick, defender.colour), defender.nextAction[1]))
 
 
                 realdmg = (random.random() * dmg) + mindmg
@@ -221,7 +235,7 @@ class Fight(object):
 
 
         if defender.hp <= 0:
-            self.IRC.privmsg(self.IRC.channel, "\x02\x0305{} passed out.\x0f".format(defender.nick))
+            self.shout("{}{} passed out.".format(self.IRC.mirc.BOLD, self.IRC.mirc.color(defender.nick, self.IRC.mirc.colors.YELLOW)))
             self.state = "fight_over"
             return
 
@@ -241,8 +255,8 @@ class Fight(object):
 
     def prettyTxt(self, attacker, defender, txtlist):
         txt = txtlist[random.randint(0, len(txtlist)-1)]
-        txt = txt.replace("%attacker%", "\x02\x03{}{}\x0f".format(attacker.colour, attacker.nick))
-        txt = txt.replace("%defender%", "\x02\x03{}{}\x0f".format(defender.colour, defender.nick))
+        txt = txt.replace("%attacker%", "{}{}".format(self.IRC.mirc.BOLD, self.IRC.mirc.color(attacker.nick, attacker.colour)))
+        txt = txt.replace("%defender%", "{}{}".format(self.IRC.mirc.BOLD, self.IRC.mirc.color(defender.nick, defender.colour)))
         return txt
 
     def shout(self, msg):
