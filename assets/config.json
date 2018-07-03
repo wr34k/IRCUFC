@@ -128,7 +128,12 @@
                     "chance": 20
                 },
                 "ground": {
-                    "chance": 70
+                    "above": {
+                        "chance": 10
+                    },
+                    "below": {
+                        "chance": 85
+                    }
                 }
             },
             "kick": {
@@ -143,12 +148,22 @@
                         ]
                     },
                     "ground": {
-                        "dmgidx": 40,
-                        "mindmg": 23,
-                        "blockidx": 42,
-                        "text": [
-                            "%attacker% hit %defender% with huge kneel kicks to the head!"
-                        ]
+                        "above": {
+                            "dmgidx": 20,
+                            "mindmg": 11,
+                            "blockidx": 66,
+                            "text": [
+                                "%attacker% hit %defender% with kneel kicks to the head from below"
+                            ]
+                        },
+                        "below": {
+                            "dmgidx": 40,
+                            "mindmg": 23,
+                            "blockidx": 42,
+                            "text": [
+                                "%attacker% hit %defender% with huge kneel kicks to the head!"
+                            ]
+                        }
                     }
                 },
                 "middle": {
@@ -162,12 +177,22 @@
                         ]
                     },
                     "ground": {
-                        "dmgidx": 25,
-                        "mindmg": 17,
-                        "blockidx": 48,
-                        "text": [
-                            "%attacker% hit %defender% with kneel kicks to the body"
-                        ]
+                        "above": {
+                            "dmgidx": 13,
+                            "mindmg": 9,
+                            "blockidx": 70,
+                            "text": [
+                                "%attacker% hit %defender% with kneel kicks to the body for below"
+                            ]
+                        },
+                        "below": {
+                            "dmgidx": 25,
+                            "mindmg": 17,
+                            "blockidx": 48,
+                            "text": [
+                                "%attacker% hit %defender% with kneel kicks to the body"
+                            ]
+                        }
                     }
                 },
                 "low": {
@@ -181,12 +206,22 @@
                         ]
                     },
                     "ground": {
-                        "dmgidx": 15,
-                        "mindmg": 2,
-                        "blockidx": 40,
-                        "text": [
-                            "%attacker% hit %defender% with kneel kicks to the legs"
-                        ]
+                        "above": {
+                            "dmgidx": 7,
+                            "mindmg": 2,
+                            "blockidx": 65,
+                            "text": [
+                                "%attacker% hit %defender% with kneel kicks to the legs from below"
+                            ]
+                        },
+                        "below": {
+                            "dmgidx": 15,
+                            "mindmg": 2,
+                            "blockidx": 40,
+                            "text": [
+                                "%attacker% hit %defender% with kneel kicks to the legs"
+                            ]
+                        }
                     }
                 }
             },

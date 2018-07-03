@@ -117,9 +117,9 @@ class Fight(object):
         else:
             for f in self.fighters:
                 if f.nick == nick:
-                    self.IRC.privmsg(nick, "[{}] Status for {} -> Current health: {} | Current stance: {} | Next action: {}".format(self.IRC.mirc.color("*", self.IRC.mirc.colors.GREEN), f.nick, int(f.hp), f.stance, f.nextAction))
+                    self.IRC.privmsg(nick, "[{}] Status for {} -> Current health: {} | Current stance: {} {} | Next action: {}".format(self.IRC.mirc.color("*", self.IRC.mirc.colors.GREEN), f.nick, int(f.hp), f.stance, f.groundPos if f.groundPos else "", f.nextAction if f.nextAction else ""))
                 else:
-                    self.IRC.privmsg(nick, "[{}] Status for {} -> Current health: {} | Current stance: {}".format(self.IRC.mirc.color("*", self.IRC.mirc.colors.GREEN), f.nick, int(f.hp), f.stance))
+                    self.IRC.privmsg(nick, "[{}] Status for {} -> Current health: {} | Current stance: {} {}".format(self.IRC.mirc.color("*", self.IRC.mirc.colors.GREEN), f.nick, int(f.hp), f.stance, f.groundPos if f.groundPos else ""))
 
 
     def fightOver(self):
@@ -174,19 +174,22 @@ class Fight(object):
 
 
     def get_next_move_data(self, f, e):
-        dmg         = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance]['dmgidx']
-        mindmg      = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance]['mindmg']
-        blockidx    = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance]['blockidx']
-        fallchance  = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance]['fallchance']  \
-            if 'fallchance' in self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance] \
-                else 0
-        standchance  = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance]['standchance']  \
-            if 'standchance' in self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance] \
-                else 0
+        if f.stance == e.stance == 'ground':
+            dmg         = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance][e.groundPos]['dmgidx']
+            mindmg      = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance][e.groundPos]['mindmg']
+            blockidx    = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance][e.groundPos]['blockidx']
+            fallchance  = 0
+            texts    = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance][e.groundPos]['text']
+        else:
+            dmg         = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance]['dmgidx']
+            mindmg      = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance]['mindmg']
+            blockidx    = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance]['blockidx']
+            fallchance  = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance]['fallchance']  \
+                if 'fallchance' in self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance] \
+                    else 0
+            texts    = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance]['text']
 
-        texts    = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance]['text']
-
-        return dmg, mindmg, blockidx, fallchance, standchance, texts
+        return dmg, mindmg, blockidx, fallchance, texts
 
     def attack(self):
         roll1 = roll2 = 0
@@ -221,10 +224,19 @@ class Fight(object):
         attacker.advantage = True
         defender.advantage = False
 
+        if attacker.stance == defender.stance == 'ground':
+            if attacker.groundPos == 'below':
+                attacker.groundPos = 'above'
+                defender.groundPos = 'below'
+                self.shout("{} Manage to get above {}!".format( \
+                    self.IRC.mirc.color(attacker.nick, attacker.colour), \
+                    self.IRC.mirc.color(defender.nick, defender.colour) \
+                ))
+
         if attacker.nextAction[0] == 'standup':
             standchance = self.config['moves'][attacker.stance]['standup'][defender.stance]['chance']
         else:
-            dmg, mindmg, blockidx, fallchance, standchance, texts = self.get_next_move_data(attacker, defender)
+            dmg, mindmg, blockidx, fallchance, texts = self.get_next_move_data(attacker, defender)
 
             txt = self.prettyTxt(attacker, defender, texts)
             self.shout("{}".format(txt))
@@ -250,6 +262,10 @@ class Fight(object):
 
                 if (random.random() * 100) < fallchance: # defender falls down?
                     defender.stance = 'ground'
+                    if attacker.stance == 'ground':
+                        defender.groundPos = 'above'
+                    else:
+                        defender.groundPos = 'below'
                     falltxt = self.prettyTxt(attacker, defender, self.config['info']['stand2ground'])
                     self.shout("{}".format(falltxt))
 
@@ -266,8 +282,11 @@ class Fight(object):
 
 
         if attacker.nextAction[0] == 'standup': # attacker gets up?
-            if (random.random() * 100) < standchance: # DO you get up?
+            if (random.random() * 100) < standchance:
                 attacker.stance = 'stand'
+                attacker.groundPos = None
+                if defender.stance == 'ground' and defender.groundPos == 'above':
+                    defender.groundPos = 'below'
                 standtxt = self.prettyTxt(attacker, defender, self.config['info']['ground2stand'])
                 self.shout("{}".format(standtxt))
 

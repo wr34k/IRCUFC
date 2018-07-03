@@ -11,6 +11,7 @@ class Fighter(object):
 
         self.hp = 100
         self.stance = 'stand'
+        self.groundPos = None
 
         self.nextAction = None
 
