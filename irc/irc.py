@@ -89,7 +89,7 @@ class IrcBot(object):
                     data = self.sock.recv(1024).decode('utf-8', 'ignore')
 
                 for line in [x.split() for x in data.split("\r\n") if len(x.split()) > 1]:
-                    self.log.info("<< {}".format(' '.join(line)))
+                    # self.log.info("<< {}".format(' '.join(line)))
 
                     if line[0][1:] == 'ING':
                         ircEvents.eventPING(self, line)

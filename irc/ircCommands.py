@@ -74,7 +74,7 @@ class IrcCommands(object):
                 if chan != self.IRC.channel:
                     self.fight.set_next_action(nick, args)
                 else:
-                    self.IRC.privmsg(self.IRC.channel, "{}".format(self.IRC.mirc.color("Not here retard your opponent can see your next move!", self.IRC.mirc.colors.LIGHTRED)))
+                    self.IRC.privmsg(self.IRC.channel, "{}".format(self.IRC.mirc.color("Not here retard your opponent can see your next move!", self.IRC.mirc.colors.PURPLE)))
 
 
         self.IRC.flood_flag[chan] = False

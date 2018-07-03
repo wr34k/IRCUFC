@@ -21,18 +21,18 @@
             "kick": {
                 "high": {
                     "stand": {
-                        "dmgidx": 40,
+                        "dmgidx": 30,
                         "mindmg": 20,
                         "fallchance": 5,
-                        "blockidx": 50,
+                        "missluck": 30,
                         "text": [
                             "%attacker% head kicks %defender%"
                         ]
                     },
                     "ground": {
-                        "dmgidx": 60,
+                        "dmgidx": 45,
                         "mindmg": 25,
-                        "blockidx": 28,
+                        "missluck": 20,
                         "text": [
                             "%attacker% stomps %defender% in the head!"
                         ]
@@ -40,18 +40,18 @@
                 },
                 "middle": {
                     "stand": {
-                        "dmgidx": 30,
+                        "dmgidx": 20,
                         "mindmg": 10,
                         "fallchance": 8,
-                        "blockidx": 38,
+                        "missluck": 20,
                         "text": [
                             "%attacker% middle kicks %defender%"
                         ]
                     },
                     "ground": {
-                        "dmgidx": 45,
+                        "dmgidx": 30,
                         "mindmg": 20,
-                        "blockidx": 32,
+                        "missluck": 10,
                         "text": [
                             "%attacker% stomps %defender% in the body!"
                         ]
@@ -59,18 +59,18 @@
                 },
                 "low": {
                     "stand": {
-                        "dmgidx": 23,
+                        "dmgidx": 13,
                         "mindmg": 5,
                         "fallchance": 15,
-                        "blockidx": 35,
+                        "missluck": 22,
                         "text": [
                             "%attacker% low kicks %defender%"
                         ]
                     },
                     "ground": {
-                        "dmgidx": 30,
-                        "mindmg": 15,
-                        "blockidx": 40,
+                        "dmgidx": 10,
+                        "mindmg": 5,
+                        "missluck": 12,
                         "text": [
                             "%attacker% kicks %defender%'s legs while %defender% is on the ground"
                         ]
@@ -80,10 +80,10 @@
             "punch": {
                 "high": {
                     "stand": {
-                        "dmgidx": 30,
-                        "mindmg": 10,
+                        "dmgidx": 18,
+                        "mindmg": 12,
                         "fallchance": 2,
-                        "blockidx": 30,
+                        "missluck": 25,
                         "text": [
                             "%attacker% head punches %defender%"
                         ]
@@ -91,10 +91,10 @@
                 },
                 "middle": {
                     "stand": {
-                        "dmgidx": 20,
-                        "mindmg": 5,
+                        "dmgidx": 10,
+                        "mindmg": 6,
                         "fallchance": 4,
-                        "blockidx": 21,
+                        "missluck": 10,
                         "text": [
                             "%attacker% punches %defender% to the body"
                         ]
@@ -139,27 +139,27 @@
             "kick": {
                 "high": {
                     "stand": {
-                        "dmgidx": 30,
+                        "dmgidx": 15,
                         "mindmg": 10,
                         "fallchance": 8,
-                        "blockidx": 58,
+                        "missluck": 40,
                         "text": [
                             "%attacker% head kicks %defender% from the ground!"
                         ]
                     },
                     "ground": {
                         "above": {
-                            "dmgidx": 20,
-                            "mindmg": 11,
-                            "blockidx": 66,
+                            "dmgidx": 10,
+                            "mindmg": 14,
+                            "missluck": 30,
                             "text": [
                                 "%attacker% hit %defender% with kneel kicks to the head from below"
                             ]
                         },
                         "below": {
-                            "dmgidx": 40,
-                            "mindmg": 23,
-                            "blockidx": 42,
+                            "dmgidx": 25,
+                            "mindmg": 20,
+                            "missluck": 15,
                             "text": [
                                 "%attacker% hit %defender% with huge kneel kicks to the head!"
                             ]
@@ -168,27 +168,27 @@
                 },
                 "middle": {
                     "stand": {
-                        "dmgidx": 20,
-                        "mindmg": 5,
+                        "dmgidx": 12,
+                        "mindmg": 8,
                         "fallchance": 5,
-                        "blockidx": 43,
+                        "missluck": 33,
                         "text": [
                             "%attacker% middle kicks %defender% from the ground!"
                         ]
                     },
                     "ground": {
                         "above": {
-                            "dmgidx": 13,
-                            "mindmg": 9,
-                            "blockidx": 70,
+                            "dmgidx": 8,
+                            "mindmg": 3,
+                            "missluck": 26,
                             "text": [
                                 "%attacker% hit %defender% with kneel kicks to the body for below"
                             ]
                         },
                         "below": {
-                            "dmgidx": 25,
-                            "mindmg": 17,
-                            "blockidx": 48,
+                            "dmgidx": 18,
+                            "mindmg": 15,
+                            "missluck": 12,
                             "text": [
                                 "%attacker% hit %defender% with kneel kicks to the body"
                             ]
@@ -197,27 +197,27 @@
                 },
                 "low": {
                     "stand": {
-                        "dmgidx": 15,
-                        "mindmg": 3,
-                        "fallchance": 18,
-                        "blockidx": 33,
+                        "dmgidx": 8,
+                        "mindmg": 1,
+                        "fallchance": 28,
+                        "missluck": 12,
                         "text": [
                             "%attacker% low kicks %defender% from the ground!"
                         ]
                     },
                     "ground": {
                         "above": {
-                            "dmgidx": 7,
-                            "mindmg": 2,
-                            "blockidx": 65,
+                            "dmgidx": 4,
+                            "mindmg": 1,
+                            "missluck": 22,
                             "text": [
                                 "%attacker% hit %defender% with kneel kicks to the legs from below"
                             ]
                         },
                         "below": {
-                            "dmgidx": 15,
-                            "mindmg": 2,
-                            "blockidx": 40,
+                            "dmgidx": 12,
+                            "mindmg": 8,
+                            "missluck": 8,
                             "text": [
                                 "%attacker% hit %defender% with kneel kicks to the legs"
                             ]

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import random, json, os
+import random, json, os, time
 
 from fighter import Fighter
 
@@ -177,19 +177,19 @@ class Fight(object):
         if f.stance == e.stance == 'ground':
             dmg         = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance][e.groundPos]['dmgidx']
             mindmg      = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance][e.groundPos]['mindmg']
-            blockidx    = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance][e.groundPos]['blockidx']
             fallchance  = 0
-            texts    = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance][e.groundPos]['text']
+            missluck    = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance][e.groundPos]['missluck']
+            texts       = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance][e.groundPos]['text']
         else:
             dmg         = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance]['dmgidx']
             mindmg      = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance]['mindmg']
-            blockidx    = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance]['blockidx']
             fallchance  = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance]['fallchance']  \
                 if 'fallchance' in self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance] \
                     else 0
-            texts    = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance]['text']
+            missluck    = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance]['missluck']
+            texts       = self.config['moves'][f.stance][f.nextAction[0]][f.nextAction[1]][e.stance]['text']
 
-        return dmg, mindmg, blockidx, fallchance, texts
+        return dmg, mindmg, fallchance, missluck, texts
 
     def attack(self):
         roll1 = roll2 = 0
@@ -228,7 +228,7 @@ class Fight(object):
             if attacker.groundPos == 'below':
                 attacker.groundPos = 'above'
                 defender.groundPos = 'below'
-                self.shout("{} Manage to get above {}!".format( \
+                self.shout("{} manages to get above {}!".format( \
                     self.IRC.mirc.color(attacker.nick, attacker.colour), \
                     self.IRC.mirc.color(defender.nick, defender.colour) \
                 ))
@@ -236,10 +236,11 @@ class Fight(object):
         if attacker.nextAction[0] == 'standup':
             standchance = self.config['moves'][attacker.stance]['standup'][defender.stance]['chance']
         else:
-            dmg, mindmg, blockidx, fallchance, texts = self.get_next_move_data(attacker, defender)
+            dmg, mindmg, fallchance, missluck, texts = self.get_next_move_data(attacker, defender)
+
+            realdmg = (random.random() * dmg) + mindmg
 
             txt = self.prettyTxt(attacker, defender, texts)
-            self.shout("{}".format(txt))
 
             blockchance = 0
             if defender.nextAction[0] == 'block':
@@ -248,26 +249,32 @@ class Fight(object):
                     blocktxts       = self.config["moves"][defender.stance][defender.nextAction[0]][defender.nextAction[1]]["text"]
 
 
-            if  (random.random() * 100) < blockchance * (blockidx / 100):
-                blocktxt = self.prettyTxt(attacker, defender, blocktxts)
-                self.shout("{}".format(blocktxt))
+            if  (random.random() * 100) < blockchance:
+                    blocktxt = self.prettyTxt(attacker, defender, blocktxts)
+                    self.shout("{}".format(txt))
+                    self.shout("{}".format(blocktxt))
             else:
-                if defender.nextAction[0] == 'block':
-                    self.shout("{} Tryed to block {} but failed miserably!".format(self.IRC.mirc.color(defender.nick, defender.colour), defender.nextAction[1]))
+                if (random.random()*100) < missluck:
+                    self.shout("{}".format(txt))
+                    self.shout("{} failed to hit {}!".format(self.IRC.mirc.color(attacker.nick, attacker.colour), self.IRC.mirc.color(defender.nick, defender.colour)))
+                    defender.advantage = True
+                    attacker.advantage = False
+                else:
+                    txt += " | (- {} hp)".format(self.IRC.mirc.color(int(realdmg), self.IRC.mirc.colors.YELLOW))
+                    self.shout("{}".format(txt))
+                    if defender.nextAction[0] == 'block':
+                        self.shout("{} tried to block {} but failed miserably!".format(self.IRC.mirc.color(defender.nick, defender.colour), defender.nextAction[1]))
 
+                    defender.hp -= realdmg
 
-                realdmg = (random.random() * dmg) + mindmg
-
-                defender.hp -= realdmg
-
-                if (random.random() * 100) < fallchance: # defender falls down?
-                    defender.stance = 'ground'
-                    if attacker.stance == 'ground':
-                        defender.groundPos = 'above'
-                    else:
-                        defender.groundPos = 'below'
-                    falltxt = self.prettyTxt(attacker, defender, self.config['info']['stand2ground'])
-                    self.shout("{}".format(falltxt))
+                    if (random.random() * 100) < fallchance: # defender falls down?
+                        defender.stance = 'ground'
+                        if attacker.stance == 'ground':
+                            defender.groundPos = 'above'
+                        else:
+                            defender.groundPos = 'below'
+                        falltxt = self.prettyTxt(attacker, defender, self.config['info']['stand2ground'])
+                        self.shout("{}".format(falltxt))
 
 
         if defender.hp <= 0:
@@ -304,15 +311,20 @@ class Fight(object):
         self.IRC.privmsg(self.IRC.channel, msg)
 
     def updatePalmares(self, winner, looser):
+        if not os.path.isfile(PALMARES_FILE):
+            open(PALMARES_FILE, "x").close()
 
-        mode = "r" if os.path.exists(PALMARES_FILE) else "w+"
-        with open(PALMARES_FILE, mode) as f:
+        with open(PALMARES_FILE, "r") as f:
             try:
-                palmares = json.loads(f.read())
+                data = f.read()
+                palmares = {}
+                if data:
+                    palmares = json.loads(data)
             except Exception as e:
-                self.IRC.log.error("Error in json.loads() backuping palmares file to {}.bkp".format(PALMARES_FILE), e)
+                tNow = int(time.time())
+                self.IRC.log.error("Error in json.loads() backuping palmares file to {}.{}.bkp".format(PALMARES_FILE, tNow), e)
                 from shutil import copyfile
-                copyfile(PALMARES_FILE, "{}.bkp".format(PALMARES_FILE))
+                copyfile(PALMARES_FILE, "{}.{}.bkp".format(PALMARES_FILE, tNow))
                 palmares = {}
 
         if winner.nick not in palmares:
