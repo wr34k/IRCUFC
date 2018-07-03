@@ -54,6 +54,11 @@ class IrcCommands(object):
                 else:
                     self.IRC.raw(" ".join(args))
 
+            if cmd == 'cancel' and self.fight.state != 'inactive':
+                self.IRC.privmsg(chan, "Fight cancelled.")
+                self.fight.state = 'inactive'
+                self.fight.fighters = []
+
 
         if cmd == 'status':
             self.fight.getStatus(chan)
