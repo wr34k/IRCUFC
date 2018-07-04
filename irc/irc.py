@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import sys, socket, ssl, time, os, re
+import sys, socket, ssl, time, os, re, select
 
 sys.dont_write_bytecode = True
 os.chdir(sys.path[0] or ".")
@@ -14,25 +14,11 @@ from ircReload import recompile
 from ircCommands import IrcCommands
 
 
-server     = 'irc.underworld.no'
-port       = 9999
-channel   = ('#IRCUFC', None) # (chan, key)
-use_ssl    = True
-
-nickname = 'IRCUFC'
-username = 'McBuffer'
-realname = '** WE FIGHTIN **'
-
-optkey= "!"
-
-DEBUG = True
-
-
 class IrcBot(object):
 
-    def __init__(self):
+    def __init__(self, nickname="IRCUFC", username="McBuffer", realname="WE FIGHTIN", server="irc.underworld.no", port=9999, use_ssl=True, channel=("#IRCUFC", None), optkey="!", DEBUG=True):
         self.sock           = None
-        self.lag            = False
+        self.ep             = None
 
         self.last_cmd       = {}
         self.flood_flag     = {}
@@ -45,7 +31,7 @@ class IrcBot(object):
 
         self.server         = server
         self.port           = port
-        self.ssl            = use_ssl
+        self._ssl           = use_ssl
 
         self.nick           = nickname
         self.user           = username
@@ -55,75 +41,142 @@ class IrcBot(object):
 
         self.channel,self.chankey = channel
 
+        self.recvQueue = self.sendQueue = []
+
+        self.partialLine = ''
 
     def connect(self):
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.setblocking(0)
         try:
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            if use_ssl:
-                self.sock = ssl.wrap_socket(self.sock)
-            self.sock.connect((server, port))
-        except Exception as e:
-            self.log.error("Connexion failed", e)
-            return
+            self.sock.connect((self.server, self.port))
+        except BlockingIOError:
+            pass
+        socketfd = self.sock.fileno()
+        self.ep = select.epoll()
+        self.ep.register(self.sock.fileno(), select.EPOLLIN | select.EPOLLOUT)
+        ready = False
+        while not ready:
+            events = self.ep.poll(1)
+            for _,evt in events:
+                if evt & select.EPOLLOUT:
+                    ready = True
+                    break
+
+        if self._ssl:
+            self.sock = ssl.wrap_socket(self.sock, do_handshake_on_connect=False)
+            ready = False
+            while not ready:
+                events = self.ep.poll(1)
+                for _,evt in events:
+                    if evt & select.EPOLLOUT:
+                        try:
+                            self.sock.do_handshake()
+                            ready = True
+                        except ssl.SSLWantReadError:
+                            pass
+
+    def init(self):
+        self.connect()
+        self.register()
+        self.run()
 
 
     def run(self):
-        self.connect()
-        self.register()
-        self.listen()
+        while True:
+            events = self.ep.poll(1)
+            for _,evt in events:
+                if evt & select.EPOLLIN:
+                    self._recv()
+                elif evt & select.EPOLLOUT and len(self.sendQueue) > 0:
+                    self._send()
+
+            self.handle_events()
 
     def register(self):
-        self.raw("USER {} 0 * :{}".format(self.user, self.real))
-        self.raw("NICK {}".format(self.nick))
+        self.queue("USER {} 0 * :{}".format(self.user, self.real))
+        self.queue("NICK {}".format(self.nick))
 
     def updateNick(self):
-        self.raw("NICK {}".format(self.nick))
+        self.queue("NICK {}".format(self.nick))
 
-    def listen(self):
+    def _send(self):
+        while self.sendQueue:
+            for m in self.sendQueue:
+                self.log.info(">> {}".format(m.replace("\r\n", "")))
+
+            msg = self.sendQueue[0]
+            datasent = self.sock.send(msg.encode())
+            if datasent < len(msg):
+                self.sendQueue[0] = msg[datasent:]
+                return False
+            else:
+                del self.sendQueue[0]
+        return True
+
+    def _recv(self):
+        lines = []
         while True:
             try:
-                if self.lag:
-                    self.lag=False
-                    data += self.sock.recv(1024).decode('utf-8', 'ignore')
-                else:
-                    data = self.sock.recv(1024).decode('utf-8', 'ignore')
-
-                for line in [x.split() for x in data.split("\r\n") if len(x.split()) > 1]:
-                    # self.log.info("<< {}".format(' '.join(line)))
-
-                    if line[0][1:] == 'ING':
-                        ircEvents.eventPING(self, line)
-
-                    else:
-                        try:
-                            if hasattr(ircEvents, "event{}".format(line[1].upper())):
-                                getattr(ircEvents, "event{}".format(line[1].upper()))(self, line)
-                        except Exception as e:
-                            self.log.error("Error in getattr()", e)
-                            pass
-
-            except (UnicodeDecodeError, UnicodeEncodeError):
-                pass
-
-            except KeyboardInterrupt:
-                self.log.warn("^C, Exiting...")
+                newLines = self.sock.recv(512)
+            except BlockingIOError:
+                self.recvQueue = lines
                 return
+            except ssl.SSLWantReadError:
+                self.recvQueue = lines
+                return
+            if not newLines:
+                lines += [None]
+                break
+            elif len(newLines) == 0:
+                break
+            else:
+                newLines = str(newLines, 'utf-8', 'ignore')
+                if newLines[-2:] == "\r\n":
+                    msgs = (self.partialLine + newLines).split("\r\n")[:-1]
+                    self.partialLine = ""
+                else:
+                    msgs = (self.partialLine + newLines).split("\r\n")
+                    if len(msgs) > 1:
+                        self.partialLine = msgs[-1]
+                        msgs = msgs[:-1]
+                lines += msgs
 
-            except Exception as e:
-                self.log.error("Exception in listen()", e)
-                pass
+        self.recvQueue = lines
+        for m in self.recvQueue():
+            self.log.info("<< {}".format(m))
+
+    def handle_events(self):
+        while self.recvQueue:
+            data = self.recvQueue[0]
+            self.log.info("<< {}".format(data))
+            line = data.split(" ")
+            if line[0][1:] == 'ING':
+                ircEvents.eventPING(self, line)
+            else:
+                try:
+                    if hasattr(ircEvents, "event{}".format(line[1].upper())):
+                        getattr(ircEvents, "event{}".format(line[1].upper()))(self, line)
+                except Exception as e:
+                    self.log.error("Error in getattr()", e)
+
+            del self.recvQueue[0]
 
     def join(self):
-        self.raw("JOIN {} {}".format(self.channel, self.chankey)) if self.chankey else self.raw("JOIN {}".format(self.channel))
+        self.queue("JOIN {} {}".format(self.channel, self.chankey)) if self.chankey else self.queue("JOIN {}".format(self.channel))
 
 
-    def raw(self, msg, timeout=None):
+    def queue(self, msg):
         msg = msg.replace("\r", "")
         msg = msg.replace("\n", "")
-        self.log.info(">> " + msg)
-        self.sock.send(bytes(msg + "\r\n", 'utf-8'))
-        if timeout:
-            time.sleep(timeout)
+        if len(msg) > (512 - len("\r\n")):
+            for i in range(0, len(msg), 512 - len("\r\n")):
+                m = msg[i:512 - len("\r\n")]
+                m = m + "\r\n"
+                self.sendQueue += [m]
+        else:
+            msg = msg + "\r\n"
+            self.sendQueue += [msg]
 
     def isAdmin(self, ident):
         ret = False
@@ -134,6 +187,8 @@ class IrcBot(object):
 
 
     def handle_msg(self, chan, admin, nick, user, host, msg):
+        if len(msg) == 0:
+            return
         args = msg.split()
         if admin:
             if args[0] == '{}reload'.format(self.optkey):
@@ -152,7 +207,8 @@ class IrcBot(object):
     def privmsg(self, chan, msg):
         if chan not in self.timeouts:
             self.timeouts[chan] = {'last_cmd': time.time(), 'burst': 0, 'timeout': 0}
-        self.raw("PRIVMSG {} :{}".format(chan, msg), self.timeouts[chan]['timeout'])
+        self.queue("PRIVMSG {} :{}".format(chan, msg))
+        time.sleep(self.timeouts[chan]['timeout'])
         self.editTimeouts(chan)
 
 

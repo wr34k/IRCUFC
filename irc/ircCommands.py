@@ -52,7 +52,7 @@ class IrcCommands(object):
                 elif args[0].lower() == 'join':
                     self.IRC.join(" ".join(args[1:]))
                 else:
-                    self.IRC.raw(" ".join(args))
+                    self.IRC.queue(" ".join(args))
 
             if cmd == 'cancel' and self.fight.state != 'inactive':
                 self.IRC.privmsg(chan, "Fight cancelled.")

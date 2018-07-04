@@ -217,9 +217,7 @@ class Fight(object):
             return
 
         elif attacker.nextAction[0] == 'block':
-            tmp = attacker
-            attacker = defender
-            defender = tmp
+            attacker, defender = defender, attacker
 
         attacker.advantage = True
         defender.advantage = False

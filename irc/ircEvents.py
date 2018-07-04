@@ -3,7 +3,7 @@
 import time
 
 def eventPING(IRC, line):
-    IRC.raw("PONG {}".format(line[1]))
+    IRC.queue("PONG {}".format(line[1]))
 
 def event001(IRC, line):
     IRC.join()
@@ -29,7 +29,7 @@ def eventQUIT(IRC, line):
     if line[0][1:].split("@")[0].split("!")[0] == IRC.nick:
         IRC.log.warn("quit ! Reconnecting in 15 seconds..")
         time.sleep(15)
-        IRC.run()
+        IRC.init()
 
 def eventINVITE(IRC, line):
     IRC.log.info("{} invited the bot to {}".format(line[0][1:].split("!")[0], line[3][1:]))
@@ -38,4 +38,7 @@ def eventPRIVMSG(IRC, line):
     nick,user   = line[0][1:].split("@")[0].split("!")
     user        = user[1:] if user[0] == '~' else user
     host        = line[0].split("@")[1]
-    IRC.handle_msg(line[2], IRC.isAdmin(line[0][1:]), nick, user, host, ' '.join(line[3:])[1:])
+    try:
+        IRC.handle_msg(line[2], IRC.isAdmin(line[0][1:]), nick, user, host, ' '.join(line[3:])[1:])
+    except:
+        pass
